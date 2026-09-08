@@ -37,6 +37,7 @@
            width:calc(100vw / var(--ui));height:calc(100vh / var(--ui));zoom:var(--ui)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
+
   #menu{cursor:pointer}
   .seal-row{display:flex;align-items:center;gap:20px}
   .seal{width:54px;height:54px;background:var(--verm);color:var(--paper);display:grid;place-items:center;
@@ -262,6 +263,53 @@
   #paused{background:rgba(242,237,228,.7)}
   #paused p{font-size:13px;letter-spacing:.4em}
   #flash{position:fixed;inset:0;background:var(--verm);opacity:0;pointer-events:none;z-index:8}
+
+  /* PHONES. The UI scale is driven partly by height, so a tall narrow screen was
+     zooming the overlays UP past the edge of the display and clipping the title and
+     the control list. On a small screen, drop the zoom and let things reflow. */
+  @media (max-width:760px){
+    .overlay{zoom:1;width:100vw;height:100vh;padding:16px 12px;overflow-y:auto}
+    .seal-row{gap:12px}
+    .seal{width:38px;height:38px;font-size:22px;border-radius:6px}
+    h1{font-size:clamp(30px,10.5vw,54px);letter-spacing:.06em}
+    .tag{margin-top:12px;font-size:10px;letter-spacing:.24em}
+    .rule{margin:14px 0 2px;max-width:100%}
+    .rule svg{max-width:100%;height:auto}
+    .controls{min-width:0;width:100%;max-width:420px;gap:7px;margin-top:14px}
+    .ctl{gap:14px;font-size:10px;letter-spacing:.08em}
+    kbd{font-size:9px;padding:2px 5px;letter-spacing:.02em}
+    #forgeBtn{margin-top:16px;font-size:10px;padding:11px 18px;letter-spacing:.2em}
+    .hint{margin-top:16px;font-size:11px;letter-spacing:.24em}
+    /* the run sheet and the inkstone put their columns side by side, which does not
+       fit a phone at all — stack them and let the sheet scroll */
+    #treeTitle{font-size:16px;letter-spacing:.04em;line-height:1.15}
+    .tHead{gap:10px}
+    .tHead .seal{width:32px;height:32px;font-size:18px}
+    #treeWrap{flex-direction:column;gap:14px;width:100%;max-width:100%;max-height:none;padding:4px 0}
+    .tcol{width:100%}
+    #tstats{min-width:0;width:100%;margin-top:2px;padding-left:0;padding-top:12px;
+            border-left:none;border-top:1.5px solid var(--ink)}
+    #tstats div{gap:12px}
+    #treeHint{margin-top:12px;letter-spacing:.18em}
+    #forgeTitle{font-size:20px;letter-spacing:.05em}
+    #forgeHead{gap:10px}
+    #forgeHead .seal{width:34px;height:34px;font-size:19px}
+  }
+  /* a phone held on its side is short, not narrow — claw back the vertical space */
+  @media (max-height:460px) and (orientation:landscape){
+    .overlay{zoom:1;width:100vw;height:100vh;padding:6px 10px;overflow-y:auto;justify-content:center}
+    .seal-row{gap:10px}
+    .seal{width:30px;height:30px;font-size:17px;border-radius:5px}
+    h1{font-size:clamp(22px,4.4vw,34px)}
+    .tag{margin-top:4px;font-size:9px;letter-spacing:.2em}
+    .rule{margin:5px 0 0}
+    .controls{margin-top:5px;gap:2px;max-width:600px}
+    .ctl{font-size:9px;gap:14px}
+    kbd{font-size:8px;padding:1px 5px}
+    #forgeBtn{margin-top:7px;font-size:9px;padding:8px 14px}
+    #forgeBtn b{font-size:12px}
+    .hint{margin-top:7px;font-size:10px}
+  }
 </style>
 </head>
 <body>

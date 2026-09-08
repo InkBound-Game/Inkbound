@@ -6,7 +6,7 @@
 
 <p align="center"><em>Every room paints a picture.</em></p>
 
-<p align="center"><strong><a href="https://inkbound-game.github.io/">▶ Play it in your browser</a></strong></p>
+<p align="center"><strong><a href="https://inkbound-game.github.io/Inkbound/">▶ Play it in your browser</a></strong></p>
 
 ---
 

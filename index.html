@@ -3697,6 +3697,47 @@ function drawPedestal(p){
     ctx.save();
     if(e.grace>0) ctx.globalAlpha=(e.type==='boss')?0.8:0.55;
     let ex=e.x, ey=e.y;
+    if((e.type==='charger'||e.type==='boss')&&e.st==='aim'){ ex+=(Math.random()-0.5)*3; ey+=(Math.random()-0.5)*3; }
+    /* THE BODY. Every enemy is a blot of ink on the page — without this they are
+       invisible but still solid, which is exactly as unfair as it sounds. */
+    ctx.fillStyle=e.flash>0?VERM:INK;
+    ctx.beginPath();
+    if(e.type==='boss') blobPath(ex,ey,e.r*(0.6+0.4*Math.min(1,e.born/0.25))*(1+0.3*e.puff),e.rot,3,7,0.14,e.seed);
+    else if(e.type==='charger') blobPath(ex,ey,e.r*(0.6+0.4*Math.min(1,e.born/0.25)),e.rot,5,9,0.22,e.seed);
+    else blobPath(ex,ey,e.r*(0.6+0.4*Math.min(1,e.born/0.25))*(e.type==='spitter'?1+0.35*e.puff:1),
+                  e.rot,3,5,0.16,e.seed);
+    ctx.fill();
+    const pa=Math.atan2(P.y-e.y,P.x-e.x);
+    if(e.type==='splitter'||e.type==='spitter'||e.type==='boss'){
+      ctx.fillStyle=PAPER;
+      const off=e.r*0.28, es=(e.type==='boss'?5.5:3.2)*UI, gap=(e.type==='boss'?11:8)*UI;
+      ctx.beginPath(); ctx.arc(ex+Math.cos(pa)*off-gap/2,ey+Math.sin(pa)*off,es,0,TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex+Math.cos(pa)*off+gap/2,ey+Math.sin(pa)*off,es,0,TAU); ctx.fill();
+      if(e.type==='spitter'&&e.fireT<0.3&&e.fireT>0){
+        ctx.beginPath(); ctx.arc(ex+Math.cos(pa)*e.r*0.45,ey+Math.sin(pa)*e.r*0.45,
+                                 e.r*0.4*(1-e.fireT/0.3),0,TAU); ctx.fill();
+      }
+    }
+    /* a Warden's shield has to be visible — the whole fight is about its facing */
+    if(e.type==='warden'&&e.fx!==undefined){
+      const fa=Math.atan2(e.fy,e.fx);
+      ctx.strokeStyle=INK; ctx.globalAlpha=e.grace>0?0.4:0.9; ctx.lineWidth=4*UI; ctx.lineCap='round';
+      ctx.beginPath(); ctx.arc(ex,ey,e.r+6*UI,fa-0.85,fa+0.85); ctx.stroke();
+      ctx.globalAlpha=e.grace>0?0.55:1;
+    }
+    /* a bomber about to go off, and a sentinel's rooted stance */
+    if(e.type==='bomber'&&e.fuse>0){
+      ctx.strokeStyle=VERM; ctx.globalAlpha=0.4+0.5*Math.abs(Math.sin(S.t*14));
+      ctx.lineWidth=2.5*UI;
+      ctx.beginPath(); ctx.arc(ex,ey,e.r+9*UI,0,TAU); ctx.stroke();
+      ctx.globalAlpha=e.grace>0?0.55:1;
+    }
+    if(e.type==='sentinel'){
+      ctx.strokeStyle=INK; ctx.globalAlpha=0.35; ctx.lineWidth=1.5*UI;
+      ctx.setLineDash([3,5]);
+      ctx.beginPath(); ctx.arc(ex,ey,e.r+7*UI,0,TAU); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha=e.grace>0?0.55:1;
+    }
     if(e.type==='charger'&&e.st==='aim'){
       ctx.strokeStyle=INK; ctx.globalAlpha=0.3*(e.grace>0?0.5:1);
       ctx.lineWidth=1.5; ctx.setLineDash([4,6]);

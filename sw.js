@@ -1,9 +1,9 @@
-/* Everything the game needs is in these few files, so cache them on install and
-   serve from cache first. Bump CACHE when you ship a new build. */
-const CACHE = 'inkbound-v1';
-const FILES = [
-  './',
-  './index.html',
+/* Cache strategy matters here. The page itself is fetched network-first, so a new
+   build always wins and a stale cache can never trap someone on an old version.
+   Static assets stay cache-first because they only change when CACHE changes.
+   Bump CACHE on every deploy. */
+const CACHE = 'inkbound-v3';
+const ASSETS = [
   './manifest.webmanifest',
   './favicon.png',
   './icon-192.png',
@@ -12,7 +12,11 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS.concat(['./index.html'])))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
@@ -24,18 +28,36 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+  const req = e.request;
+  if (req.method !== 'GET') return;
+
+  const isPage = req.mode === 'navigate' || req.destination === 'document';
+
+  if (isPage) {
+    /* always try the network first so an update lands immediately; fall back to the
+       cached page only when genuinely offline */
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match('./index.html').then(hit => hit || caches.match('./')))
+    );
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then(hit => {
+    caches.match(req).then(hit => {
       if (hit) return hit;
-      return fetch(e.request).then(res => {
-        /* keep whatever else it pulls (the web fonts) for the next offline run */
+      return fetch(req).then(res => {
         if (res.ok && (res.type === 'basic' || res.type === 'cors')) {
           const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         }
         return res;
-      }).catch(() => caches.match('./index.html'));
+      }).catch(() => hit);
     })
   );
 });
